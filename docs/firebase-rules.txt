@@ -51,7 +51,7 @@ service cloud.firestore {
         && (photos.size() < 5 || validPhoto(photos[4]));
     }
     function validStore() {
-      return request.resource.data.keys().hasOnly(['name', 'description', 'color', 'logoUrl', 'logoData', 'textColor', 'showName', 'showLogo', 'showGiftName', 'showGiftLogo', 'gallery', 'pageColor', 'pageTextColor', 'buttonColor', 'buttonTextColor', 'currency', 'published', 'catalogInitialized', 'updatedAt'])
+      return request.resource.data.keys().hasOnly(['name', 'description', 'color', 'logoUrl', 'logoData', 'textColor', 'showName', 'showLogo', 'showGiftName', 'showGiftLogo', 'gallery', 'pageColor', 'pageTextColor', 'buttonColor', 'buttonTextColor', 'cardColor', 'cardTextColor', 'currency', 'published', 'catalogInitialized', 'updatedAt'])
         && request.resource.data.keys().hasAll(['name', 'description', 'color', 'logoUrl', 'currency', 'published', 'updatedAt'])
         && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 120
         && request.resource.data.description is string && request.resource.data.description.size() <= 500
@@ -71,6 +71,8 @@ service cloud.firestore {
         && (!('pageTextColor' in request.resource.data) || (request.resource.data.pageTextColor is string && request.resource.data.pageTextColor.matches('^#[0-9a-fA-F]{6}$')))
         && (!('buttonColor' in request.resource.data) || (request.resource.data.buttonColor is string && request.resource.data.buttonColor.matches('^#[0-9a-fA-F]{6}$')))
         && (!('buttonTextColor' in request.resource.data) || (request.resource.data.buttonTextColor is string && request.resource.data.buttonTextColor.matches('^#[0-9a-fA-F]{6}$')))
+        && (!('cardColor' in request.resource.data) || (request.resource.data.cardColor is string && request.resource.data.cardColor.matches('^#[0-9a-fA-F]{6}$')))
+        && (!('cardTextColor' in request.resource.data) || (request.resource.data.cardTextColor is string && request.resource.data.cardTextColor.matches('^#[0-9a-fA-F]{6}$')))
         && (!('catalogInitialized' in request.resource.data) || request.resource.data.catalogInitialized is bool)
         && request.resource.data.currency == 'ARS' && request.resource.data.published is bool
         && request.resource.data.updatedAt == request.time;
