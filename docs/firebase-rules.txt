@@ -1,0 +1,143 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+    function activeTenant(tenantId) {
+      return get(/databases/$(database)/documents/tenants/$(tenantId)).data.status == 'active';
+    }
+    function googleUser() {
+      return signedIn() && request.auth.token.firebase.sign_in_provider == 'google.com';
+    }
+    function superadmin() {
+      return googleUser()
+        && exists(/databases/$(database)/documents/platformAdmins/$(request.auth.token.email))
+        && get(/databases/$(database)/documents/platformAdmins/$(request.auth.token.email)).data.status == 'active';
+    }
+    function emailAdmin(data) {
+      return googleUser() && ('adminEmails' in data) && request.auth.token.email in data.adminEmails;
+    }
+    function member(tenantId) {
+      return signedIn() && activeTenant(tenantId) && (superadmin()
+        || emailAdmin(get(/databases/$(database)/documents/tenants/$(tenantId)).data)
+        || (get(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid)).data.status == 'active'
+        && get(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid)).data.role in ['admin', 'operator', 'viewer']));
+    }
+    function admin(tenantId) {
+      return member(tenantId) && (superadmin()
+        || emailAdmin(get(/databases/$(database)/documents/tenants/$(tenantId)).data)
+        || get(/databases/$(database)/documents/tenants/$(tenantId)/members/$(request.auth.uid)).data.role == 'admin');
+    }
+    function validTenantSettings() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'currency', 'updatedAt'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 120
+        && request.resource.data.currency in ['ARS', 'USD', 'UYU']
+        && request.resource.data.updatedAt == request.time;
+    }
+    function validPhoto(photo) {
+      return photo is map && photo.keys().hasOnly(['data','visible']) && photo.keys().hasAll(['data','visible'])
+        && photo.visible is bool && photo.data is string && photo.data.size() > 0 && photo.data.size() <= 100000
+        && photo.data.matches('^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$');
+    }
+    function validGallery(photos) {
+      return photos is list && photos.size() <= 5
+        && (photos.size() < 1 || validPhoto(photos[0]))
+        && (photos.size() < 2 || validPhoto(photos[1]))
+        && (photos.size() < 3 || validPhoto(photos[2]))
+        && (photos.size() < 4 || validPhoto(photos[3]))
+        && (photos.size() < 5 || validPhoto(photos[4]));
+    }
+    function validStore() {
+      return request.resource.data.keys().hasOnly(['name', 'description', 'color', 'logoUrl', 'logoData', 'textColor', 'showName', 'showLogo', 'showGiftName', 'showGiftLogo', 'gallery', 'pageColor', 'pageTextColor', 'buttonColor', 'buttonTextColor', 'currency', 'published', 'catalogInitialized', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['name', 'description', 'color', 'logoUrl', 'currency', 'published', 'updatedAt'])
+        && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 120
+        && request.resource.data.description is string && request.resource.data.description.size() <= 500
+        && request.resource.data.color is string && request.resource.data.color.matches('^#[0-9a-fA-F]{6}$')
+        && (!('textColor' in request.resource.data) || (request.resource.data.textColor is string && request.resource.data.textColor.matches('^#[0-9a-fA-F]{6}$')))
+        && request.resource.data.logoUrl is string && request.resource.data.logoUrl.size() <= 2000
+        && (request.resource.data.logoUrl == '' || request.resource.data.logoUrl.matches('^https://[^ @]+$'))
+        && (!('logoData' in request.resource.data) || (request.resource.data.logoData is string
+          && request.resource.data.logoData.size() <= 160000
+          && request.resource.data.logoData.matches('^data:image/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$')))
+        && (!('showLogo' in request.resource.data) || request.resource.data.showLogo is bool)
+        && (!('showGiftName' in request.resource.data) || request.resource.data.showGiftName is bool)
+        && (!('showGiftLogo' in request.resource.data) || request.resource.data.showGiftLogo is bool)
+        && (!('showName' in request.resource.data) || request.resource.data.showName is bool)
+        && (!('gallery' in request.resource.data) || validGallery(request.resource.data.gallery))
+        && (!('pageColor' in request.resource.data) || (request.resource.data.pageColor is string && request.resource.data.pageColor.matches('^#[0-9a-fA-F]{6}$')))
+        && (!('pageTextColor' in request.resource.data) || (request.resource.data.pageTextColor is string && request.resource.data.pageTextColor.matches('^#[0-9a-fA-F]{6}$')))
+        && (!('buttonColor' in request.resource.data) || (request.resource.data.buttonColor is string && request.resource.data.buttonColor.matches('^#[0-9a-fA-F]{6}$')))
+        && (!('buttonTextColor' in request.resource.data) || (request.resource.data.buttonTextColor is string && request.resource.data.buttonTextColor.matches('^#[0-9a-fA-F]{6}$')))
+        && (!('catalogInitialized' in request.resource.data) || request.resource.data.catalogInitialized is bool)
+        && request.resource.data.currency == 'ARS' && request.resource.data.published is bool
+        && request.resource.data.updatedAt == request.time;
+    }
+    function validProduct() {
+      return request.resource.data.keys().hasOnly(['name', 'description', 'amountMinor', 'active', 'deleted', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['name', 'description', 'amountMinor', 'active', 'updatedAt'])
+        && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 120
+        && request.resource.data.description is string && request.resource.data.description.size() <= 500
+        && request.resource.data.amountMinor is int && request.resource.data.amountMinor >= 10000 && request.resource.data.amountMinor <= 100000000
+        && (!('deleted' in request.resource.data) || (request.resource.data.deleted is bool && (request.resource.data.deleted == false || request.resource.data.active == false)))
+        && request.resource.data.active is bool && request.resource.data.updatedAt == request.time;
+    }
+    match /storefronts/{tenantId} {
+      allow get: if admin(tenantId) || (activeTenant(tenantId) && resource.data.published == true) || member(tenantId);
+      allow list, delete: if false;
+      allow create, update: if admin(tenantId) && validStore();
+      match /products/{productId} {
+        // Catalog has no personal data, card codes, orders or balances.
+        allow read: if member(tenantId) || (activeTenant(tenantId)
+          && get(/databases/$(database)/documents/storefronts/$(tenantId)).data.published == true);
+        allow create, update: if admin(tenantId) && validProduct();
+        allow delete: if false;
+      }
+    }
+    // Membership and discovery entries are provisioned only by a trusted Admin SDK.
+    // Google sign-in alone never grants access to a commerce.
+    match /users/{uid}/tenants/{tenantId} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+    match /platformAdmins/{email} {
+      allow get: if googleUser() && request.auth.token.email == email;
+      allow list, write: if false;
+    }
+    match /tenants/{tenantId} {
+      allow get: if member(tenantId);
+      allow list: if signedIn() && resource.data.status == 'active' && (superadmin() || emailAdmin(resource.data));
+      allow create, delete: if false;
+      allow update: if admin(tenantId) && validTenantSettings();
+
+      match /members/{uid} {
+        allow get: if member(tenantId) && (request.auth.uid == uid || admin(tenantId));
+        allow list: if admin(tenantId);
+        allow write: if false;
+      }
+      // Financial records are private. Only the trusted payment/redemption
+      // backend can issue cards, confirm payments or change balances.
+      match /giftcards/{cardId} {
+        allow read: if member(tenantId);
+        allow write: if false;
+      }
+      match /orders/{orderId} {
+        allow read: if member(tenantId);
+        allow write: if false;
+      }
+      match /redemptions/{redemptionId} {
+        allow read: if member(tenantId);
+        allow write: if false;
+      }
+      match /transactions/{transactionId} {
+        allow read: if member(tenantId);
+        allow write: if false;
+      }
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
