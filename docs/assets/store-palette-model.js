@@ -24,6 +24,7 @@ export function distributePalette(colors) {
     pageColor: background, pageTextColor: text(background),
     cardColor: background, cardTextColor: text(background),
     color: secondary, textColor: text(secondary),
-    buttonColor: accent, buttonTextColor: text(accent),
+    buttonColor: secondary, buttonTextColor: text(secondary),
+    secondaryColor: accent, secondaryTextColor: text(accent),
   };
 }
