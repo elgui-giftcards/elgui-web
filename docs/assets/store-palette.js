@@ -20,7 +20,7 @@ export function mountStorePalette(root = document) {
   const preview = section.querySelector('[data-palette-preview]');
   const controls = section.querySelector('[data-palette-inputs]');
   let generated, previous;
-  const defaults = ['#422364', '#d7f75b', '#fff7ea', '#000000'];
+  const defaults = ['#422364', '#d7f75b', '#fff7ea', '#eee8f4'];
   const labels = ['Principal', 'Secundario', 'Fondo', 'Acento'];
   const paletteInputs = labels.map((label, i) => {
     const box = document.createElement('div');
