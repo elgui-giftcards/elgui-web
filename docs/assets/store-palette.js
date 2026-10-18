@@ -9,8 +9,7 @@ export function mountStorePalette(root = document) {
   section.dataset.storePalette = '';
   section.style.cssText = 'padding:20px;border:1px solid #d9cee5;border-radius:16px;margin-bottom:24px;background:#faf8fc;color:#422364';
   section.innerHTML = `<h3 style="margin:0 0 8px">Paleta del local</h3>
-    <p style="margin:0 0 16px">Elegí 3 o 4 colores y generá una distribución automática. Después podés editar cada color por separado.</p>
-    <label style="display:flex;gap:8px;align-items:center;margin-bottom:16px"><input type="checkbox" data-use-accent style="width:auto"> Usar un cuarto color de acento</label>
+    <p style="margin:0 0 16px">Elegí 4 colores y generá una distribución automática. Después podés editar cada color por separado.</p>
     <div data-palette-inputs style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px"></div>
     <p style="font-size:.85rem">Los textos se ajustan para que contrasten con el fondo. Si hace falta, se usa blanco o negro.</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="button button-secondary" data-generate style="width:auto">Generar vista previa</button><button type="button" class="button button-secondary" data-undo style="width:auto" hidden>Deshacer paleta</button></div>
@@ -19,10 +18,9 @@ export function mountStorePalette(root = document) {
   fields.before(section);
   const status = section.querySelector('[data-palette-status]');
   const preview = section.querySelector('[data-palette-preview]');
-  const accent = section.querySelector('[data-use-accent]');
   const controls = section.querySelector('[data-palette-inputs]');
   let generated, previous;
-  const defaults = ['#422364', '#d7f75b', '#fff7ea', '#d7f75b'];
+  const defaults = ['#422364', '#d7f75b', '#fff7ea', '#000000'];
   const labels = ['Principal', 'Secundario', 'Fondo', 'Acento'];
   const paletteInputs = labels.map((label, i) => {
     const box = document.createElement('div');
@@ -34,13 +32,7 @@ export function mountStorePalette(root = document) {
     const invalidate = () => { generated = null; preview.hidden = true; preview.replaceChildren(); status.textContent = ''; };
     picker.addEventListener('input', () => { hex.value = picker.value.toUpperCase(); hex.setCustomValidity(''); invalidate(); });
     hex.addEventListener('input', () => { hex.setCustomValidity(validHex(hex.value) ? '' : 'Usá un código como #422364.'); if (validHex(hex.value)) picker.value = hex.value; invalidate(); });
-    if (i === 3) { box.hidden = true; hex.disabled = true; }
     return {box, picker, hex};
-  });
-  accent.addEventListener('change', () => {
-    paletteInputs[3].box.hidden = !accent.checked;
-    paletteInputs[3].hex.disabled = !accent.checked;
-    generated = null; preview.hidden = true; preview.replaceChildren();
   });
   const applyValues = values => {
     for (const [name, value] of Object.entries(values)) {
@@ -51,7 +43,7 @@ export function mountStorePalette(root = document) {
     }
   };
   section.querySelector('[data-generate]').addEventListener('click', () => {
-    const chosen = paletteInputs.slice(0, accent.checked ? 4 : 3);
+    const chosen = paletteInputs;
     if (chosen.some(({hex}) => !hex.reportValidity())) return;
     generated = distributePalette(chosen.map(({hex}) => hex.value));
     const p = generated;
