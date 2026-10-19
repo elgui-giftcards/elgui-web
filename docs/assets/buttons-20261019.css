@@ -1,0 +1,16 @@
+/* Compact controls with consistent spacing across the app. */
+.button{min-width:0;min-height:40px;padding:10px 16px;border-radius:8px;gap:8px;font-size:14px;font-weight:600;line-height:1.35;vertical-align:middle;white-space:normal;overflow-wrap:anywhere}
+.button-small{min-height:34px;padding:8px 12px;font-size:13px}
+.button:hover{transform:none}
+.button span[aria-hidden=true]{font-size:16px}
+.actions{gap:8px;align-items:center}
+.actions>.button{margin:0}
+.sidebar>.button{min-height:40px;padding:10px 12px;font-size:13px}
+.panel-nav button{padding:10px 12px;border-radius:8px;font-size:14px;line-height:1.4}
+.gift-option>.button{min-height:42px;padding:11px 16px;border-radius:8px;font-size:14px}
+.tenant-card-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:stretch;margin-top:18px}
+.tenant-card-actions>.button{width:100%;margin:0;padding:9px 12px;font-size:13px;min-height:36px;gap:6px}
+.tenant-card-actions>[data-open-tenant]{grid-column:1 / -1}
+.tenant-card-actions>[data-delete-tenant]{grid-column:1 / -1;justify-content:flex-start;width:auto;padding:10px 0 0;margin-top:2px;border-top:1px solid #42236412;border-radius:0;background:transparent;color:#963847;font-size:12px;min-height:30px}
+.tenant-card-actions>[data-delete-tenant]:hover{background:transparent;color:#742536}
+@media(any-pointer:coarse){.button,.button-small,.tenant-card-actions>.button,.gift-option>.button{min-height:44px}.tenant-card-actions>[data-delete-tenant]{min-height:44px}}
