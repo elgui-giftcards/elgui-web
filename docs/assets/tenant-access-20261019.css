@@ -1,0 +1,42 @@
+.panel-box.access-panel{padding:0;overflow:hidden}
+.access-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:24px 24px 20px;border-bottom:1px solid #42236414}
+.access-panel .access-kicker{font-size:10px;font-weight:700;letter-spacing:1.5px;color:#776586;margin:0 0 7px;line-height:1.4}
+.access-panel .access-heading h2{font-size:22px;letter-spacing:-.4px;line-height:1.3}
+.access-count{font-size:12px;color:#776586;white-space:nowrap;background:#f5f2f8;padding:6px 10px;border-radius:6px}
+.access-list{padding:0 24px}
+.access-table{width:100%;table-layout:fixed;font-size:13px;border-collapse:collapse}
+.access-table th{font-size:11px;letter-spacing:.03em;color:#776586;background:#faf9fc;font-weight:600;padding:11px 12px}
+.access-table th:first-child{width:38%}.access-table th:nth-child(2){width:17%}.access-table th:nth-child(3){width:26%}.access-table th:last-child{width:19%}
+.access-table td{padding:17px 12px;vertical-align:middle;white-space:normal;overflow-wrap:anywhere;border-bottom:1px solid #42236412}
+.access-table th:first-child,.access-table td:first-child{padding-left:0}
+.access-table th:last-child,.access-table td:last-child{padding-right:0}
+.access-email{display:block;font-size:13px;font-weight:600;color:#422364;line-height:1.5}
+.access-provider{display:block;font-size:11px;color:#8b7e99;margin-top:3px}
+.access-role{display:inline-block;font-size:11px;font-weight:600;line-height:1.4;border:1px solid #e6e1ed;background:#faf9fc;padding:4px 8px;border-radius:5px;color:#665479}
+.access-role-owner{background:#eee8f4;color:#422364;border-color:#e4daee}
+.access-permission{font-size:12px;color:#665479;line-height:1.5}
+.access-actions{text-align:right}
+.access-owner-note{font-size:11px;color:#94889f}
+.access-panel .access-empty{font-size:12px;color:#8b7e99;margin:14px 0 18px;line-height:1.5}
+.access-add{padding:20px 24px;background:#faf9fc;border-top:1px solid #42236412}
+.access-add h3{font-size:14px;letter-spacing:0;margin:0 0 14px}
+.access-add-form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:end;max-width:780px}
+.access-add-form .field{font-size:12px;gap:6px}.access-panel .access-add-form input{min-height:40px;padding:10px 12px;font-size:14px}
+.access-add-form>.button{margin:0;min-height:40px;white-space:nowrap}
+.access-panel .access-help{font-size:12px;line-height:1.5;margin:10px 0 0;color:#8b7e99}
+.access-panel .access-status{font-size:13px;line-height:1.5;margin:0;padding:0 24px 16px}
+.access-status:empty{display:none}
+.access-sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+@media(max-width:760px){
+.access-heading{padding:20px 18px;align-items:flex-start;flex-direction:column;gap:10px}.access-list{padding:0 18px}
+.access-table thead{display:none}.access-table,.access-table tbody{display:block;width:100%}
+.access-table tr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px 16px;padding:18px 0;border-bottom:1px solid #42236414}
+.access-table td{display:block;padding:0!important;border:0;font-size:13px;min-width:0}
+.access-table td:first-child{grid-column:1 / -1}.access-table td:nth-child(3){grid-column:1}
+.access-table .access-actions{grid-column:2;grid-row:2 / span 2;align-self:center}
+.access-table td:nth-child(2)::before,.access-table td:nth-child(3)::before{content:attr(data-label);display:block;font-size:10px;color:#94889f;margin-bottom:5px}
+.access-add{padding:20px 18px}.access-add-form{grid-template-columns:minmax(0,1fr)}.access-add-form>.button{justify-self:start;min-height:44px}
+.access-panel .access-status{padding-inline:18px}
+}
+
+@media(any-pointer:coarse){.access-add-form>.button,.access-actions>.button{min-height:44px}}
