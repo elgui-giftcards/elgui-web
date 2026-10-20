@@ -95,7 +95,7 @@ Minimum version required to store current data is: `+T+`.
   let destroyed = false, listGeneration = 0, selectedId = '', listCursor = null, historyCursor = null;
   let stopRequests = () => {}, stopClient = () => {}, stopMovements = () => {}, stopActivity = () => {}, searchTimer, historyGeneration = 0;
   const active = () => !destroyed && content.isConnected;
-  content.innerHTML = `<p class="side-note">Administrá los saldos de clientes con acuerdos o canjes por servicios. Los movimientos quedan en el historial de cada cliente.</p><section id="special-client-requests" class="panel-box"><h2>Solicitudes pendientes</h2><p>${canApprove ? 'Aprobá o rechazá las altas, ediciones, eliminaciones, cargas y consumos solicitados por administradores.' : 'Tus altas, ediciones, eliminaciones, cargas y consumos necesitan aprobación del superadmin. Los cambios se aplican al aprobarlos.'}</p><div id="special-request-list"></div></section><div class="special-clients-toolbar"><label class="field">Buscar cliente<input id="special-client-search" type="search" placeholder="Nombre del cliente" maxlength="120"></label>${admin ? '<button type="button" class="button" id="add-special-client">Agregar cliente</button>' : ''}<button type="button" class="button button-secondary" id="refresh-special-clients">Actualizar</button></div><label class="field"><span><input type="checkbox" id="show-deleted-clients"> Ver clientes eliminados</span></label><section id="special-client-create" class="panel-box" hidden></section><p id="special-clients-status" role="status" aria-live="polite"></p><div class="special-clients-layout"><section aria-label="Clientes especiales"><div id="special-client-list" class="special-client-list"></div><button type="button" id="more-special-clients" class="button button-secondary" hidden>Cargar más clientes</button></section><section id="special-client-detail" class="panel-box special-client-detail"><h2>Seleccioná un cliente</h2><p>Vas a ver su saldo y el historial de cargas y consumos.</p></section></div>`;
+  content.innerHTML = `<p class="side-note">Administrá los saldos de clientes con acuerdos o canjes por servicios. Los movimientos quedan en el historial de cada cliente.</p><section id="special-client-requests" class="panel-box"><h2>Solicitudes pendientes</h2><p>${canApprove ? 'Aprobá o rechazá las altas, ediciones, eliminaciones, cargas y consumos solicitados por administradores.' : 'Tus altas, ediciones, eliminaciones, cargas y consumos necesitan aprobación del superadmin. Los cambios se aplican al aprobarlos.'}</p><div id="special-request-list"></div></section><div class="special-clients-toolbar"><label class="field">Buscar cliente<input id="special-client-search" type="search" placeholder="Nombre del cliente" maxlength="120"></label>${admin ? '<button type="button" class="button" id="add-special-client">Agregar cliente</button>' : ''}<button type="button" class="button button-secondary" id="refresh-special-clients">Actualizar</button></div><label class="field"><span><input type="checkbox" id="show-deleted-clients"> Ver clientes eliminados</span></label><section id="special-client-create" class="panel-box" hidden></section><p id="special-clients-status" role="status" aria-live="polite"></p><div class="special-clients-layout"><section aria-label="Clientes especiales"><div id="special-client-list" class="special-client-list"></div><button type="button" id="more-special-clients" class="button button-secondary" hidden>Cargar más clientes</button></section><section id="special-client-detail" hidden class="panel-box special-client-detail"><h2>Seleccioná un cliente</h2><p>Vas a ver su saldo y el historial de cargas y consumos.</p></section></div>`;
   const list = content.querySelector('#special-client-list'), detail = content.querySelector('#special-client-detail');
   const search = content.querySelector('#special-client-search'), more = content.querySelector('#more-special-clients');
   const status = content.querySelector('#special-clients-status');
@@ -141,8 +141,10 @@ Minimum version required to store current data is: `+T+`.
         const c = snapshot.data(); if (c.status === 'deleted' && !showDeleted) continue; const button = document.createElement('button');
         button.type = 'button'; button.className = 'special-client-row'; button.dataset.clientId = snapshot.id;
         button.setAttribute('aria-pressed', String(selectedId === snapshot.id));
+        button.setAttribute('aria-expanded', String(selectedId === snapshot.id));
+        button.setAttribute('aria-controls', 'special-client-detail');
         button.innerHTML = `<span><strong>${e(c.name)}${c.status === 'deleted' ? ' · Eliminado' : c.status === 'pending' ? ' · Alta pendiente' : ''}</strong>${c.notes ? `<small>${e(c.notes)}</small>` : ''}</span><strong>${money(c.balanceMinor)}</strong>`;
-        button.onclick = () => openClient(snapshot.id);
+        button.onclick = () => selectedId === snapshot.id ? closeClient() : openClient(snapshot.id);
         list.append(button);
       }
       if (!list.children.length) list.innerHTML = '<p>No encontramos clientes. Probá con otro nombre o agregá uno nuevo.</p>';
@@ -189,11 +191,22 @@ Minimum version required to store current data is: `+T+`.
     if (selected) selected.lastElementChild.textContent = money(c.balanceMinor);
   }
 
+  function closeClient() {
+    stopClient(); stopMovements(); stopActivity(); historyGeneration++;
+    selectedId = ''; currentClient = null; historyCursor = null;
+    detail.hidden = true; detail.innerHTML = '';
+    list.querySelectorAll('[data-client-id]').forEach(button => {
+      button.setAttribute('aria-pressed', 'false');
+      button.setAttribute('aria-expanded', 'false');
+    });
+  }
+
   function openClient(clientId) {
+    detail.hidden = false;
     stopClient(); stopMovements(); stopActivity(); historyGeneration++;
     selectedId = clientId; currentClient = null; historyCursor = null;
     requestAnimationFrame(() => {if(active() && selectedId===clientId && matchMedia('(max-width:900px)').matches) detail.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});});
-    list.querySelectorAll('[data-client-id]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.clientId === clientId)));
+    list.querySelectorAll('[data-client-id]').forEach(b => {const expanded = String(b.dataset.clientId === clientId); b.setAttribute('aria-pressed', expanded); b.setAttribute('aria-expanded', expanded);});
     detail.innerHTML = `<h2 id="special-client-name">Cargando cliente…</h2><p id="special-client-created" class="side-note"></p><p id="special-client-notes" class="special-client-notes"></p><p class="special-client-balance-label">Saldo disponible</p><strong id="special-client-balance" class="special-client-balance">—</strong><div class="actions">${admin ? '<button type="button" class="button button-secondary" id="edit-special-client">Editar cliente</button><button type="button" class="button button-secondary" id="delete-special-client">Eliminar cliente</button>' : ''}${admin ? '<button type="button" class="button" data-special-action="credit">Cargar saldo</button>' : ''}${canConsume ? '<button type="button" class="button button-secondary" data-special-action="debit">Registrar consumo</button>' : ''}</div><section id="special-movement-editor" hidden></section><p id="special-movement-status" role="status" aria-live="polite"></p><h3>Historial de movimientos</h3><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Movimiento</th><th>Detalle</th><th>Importe</th><th>Saldo posterior</th><th>Solicitado por</th><th>Aprobado por</th>${canApprove ? '<th>Acciones</th>' : ''}</tr></thead><tbody id="special-client-history"><tr><td colspan="7">Cargando historial…</td></tr></tbody></table></div><button type="button" class="button button-secondary" id="more-special-movements" hidden>Ver movimientos anteriores</button><h3>Edición y eliminación</h3><div id="special-client-activity"></div><button type="button" id="more-special-activity" class="button button-secondary" hidden>Ver actividad anterior</button>`;
     detail.querySelectorAll('[data-special-action],#edit-special-client,#delete-special-client').forEach(b=>b.disabled=true);
     if (admin) detail.querySelector('#edit-special-client').onclick = () => editClient(clientId);
@@ -337,7 +350,7 @@ Minimum version required to store current data is: `+T+`.
         } else await call('createSpecialClient',operation);
         if (!active()) return;
         box.hidden=true; search.value=''; status.textContent=canApprove?'Cliente agregado.':'Alta enviada. El cliente y su saldo estarán disponibles cuando el superadmin apruebe.';
-        await loadClients(); if(active())openClient(operation.clientId);
+        await loadClients();
       } catch(error) { if(feedback.isConnected)feedback.textContent=errorText(error); }
       finally { pending=false; if(active())content.querySelector('#add-special-client').disabled=false; if(form.isConnected)form.querySelectorAll('input,textarea,button').forEach(b=>b.disabled=false); }
     };
