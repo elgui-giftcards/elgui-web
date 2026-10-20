@@ -14,3 +14,11 @@
 .tenant-card-actions>[data-delete-tenant]{grid-column:1 / -1;justify-content:center;width:100%;padding:9px 12px;margin-top:2px;border:1px solid #e9b7bf;border-radius:8px;background:#fff3f5;color:#963847;font-size:13px;min-height:36px}
 .tenant-card-actions>[data-delete-tenant]:hover{background:#fce5e9;border-color:#d58e9a;color:#742536}
 @media(any-pointer:coarse){.button,.button-small,.tenant-card-actions>.button,.gift-option>.button{min-height:44px}.tenant-card-actions>[data-delete-tenant]{min-height:44px}}
+
+/* Giftcard editing follows the commerce button palette. */
+#panel-content.tenant-giftcard-controls .button{
+background:var(--tenant-button,#422364);color:var(--tenant-button-text,#ffffff);border-color:var(--tenant-button,#422364)
+}
+#panel-content.tenant-giftcard-controls .button:hover{background:var(--tenant-button,#422364);color:var(--tenant-button-text,#ffffff);filter:brightness(.94)}
+
+#panel-content .gift-visibility{display:flex;align-items:center;justify-content:center;width:36px;min-height:36px;padding:7px;margin:0 0 12px;border-radius:8px}
