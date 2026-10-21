@@ -26,3 +26,9 @@ background:var(--tenant-button,#422364);color:var(--tenant-button-text,#ffffff);
 /* Separate account actions, including when they wrap on small screens. */
 #login-dialog #signed-in>.button{margin:6px}
 @media(max-width:480px){#login-dialog #signed-in>.button{display:flex;width:100%;margin:12px 0 0;justify-content:center}}
+
+/* Text casing tools next to giftcard field labels. */
+.text-case-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.text-case-actions{display:flex;gap:6px;flex:none}
+#panel-content .text-case-button{min-width:36px;min-height:30px;padding:5px 9px;margin:0;font-size:12px;line-height:1.2}
+@media(any-pointer:coarse){#panel-content .text-case-button{min-width:44px;min-height:44px}}
