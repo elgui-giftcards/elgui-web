@@ -40,3 +40,10 @@
 }
 
 @media(any-pointer:coarse){.access-add-form>.button,.access-actions>.button{min-height:44px}}
+
+
+.access-actions .button{margin:3px;max-width:100%}.access-table th:first-child{width:32%}.access-table th:last-child{width:25%}
+@media(min-width:761px){.access-add-form{grid-template-columns:minmax(0,1fr) 160px auto;max-width:none}}
+.access-add-form select{min-height:40px;font-size:14px}
+
+#cancel-access-edit{grid-column:1 / -1;justify-self:start}
