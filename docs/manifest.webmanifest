@@ -1,0 +1,24 @@
+{
+  "name": "Elgui - Gift Card Store",
+  "short_name": "Elgui",
+  "description": "Tu tienda de giftcards",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8f4ed",
+  "theme_color": "#422364",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
